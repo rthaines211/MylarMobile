@@ -199,27 +199,16 @@ export function useForceSearch() {
   });
 }
 
-// Derive backend URL from Mylar server URL (same host, port 3001)
-// In development, use Vite proxy to avoid CORS issues
-function getBackendUrl(serverUrl) {
-  const isDev = import.meta.env.DEV;
-  if (isDev) {
-    // Use Vite proxy in development
-    return '/backend';
-  }
-  try {
-    const url = new URL(serverUrl);
-    return `${url.protocol}//${url.hostname}:3001/api`;
-  } catch {
-    return 'http://localhost:3001/api';
-  }
+// Backend URL - always use relative URL (both Vite and nginx proxy /backend)
+function getBackendUrl() {
+  return '/backend';
 }
 
 // Weekly pull list from local database
 export function useWeeklyPull(weekNumber, year, status = 'all') {
   const { config } = useConfig();
-  const { serverUrl, mylarDbPath } = config;
-  const backendUrl = getBackendUrl(serverUrl);
+  const { mylarDbPath } = config;
+  const backendUrl = getBackendUrl();
 
   return useQuery({
     queryKey: queryKeys.weeklyPull(weekNumber, year),
@@ -241,15 +230,15 @@ export function useWeeklyPull(weekNumber, year, status = 'all') {
       }
       return data.data;
     },
-    enabled: !!serverUrl && !!mylarDbPath,
+    enabled: !!mylarDbPath,
   });
 }
 
 // Get available weeks
 export function useWeeklyWeeks() {
   const { config } = useConfig();
-  const { serverUrl, mylarDbPath } = config;
-  const backendUrl = getBackendUrl(serverUrl);
+  const { mylarDbPath } = config;
+  const backendUrl = getBackendUrl();
 
   return useQuery({
     queryKey: queryKeys.weeklyWeeks,
@@ -265,6 +254,6 @@ export function useWeeklyWeeks() {
       }
       return data.data;
     },
-    enabled: !!serverUrl && !!mylarDbPath,
+    enabled: !!mylarDbPath,
   });
 }
