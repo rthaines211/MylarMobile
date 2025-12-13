@@ -9,16 +9,8 @@ class MylarAPI {
       throw new Error('API not configured');
     }
 
-    // In development, use relative URL so Vite proxy handles CORS
-    // In production, use the configured baseUrl
-    const isDev = import.meta.env.DEV;
-    const baseUrl = isDev ? '' : this.baseUrl;
-
-    if (!isDev && !this.baseUrl) {
-      throw new Error('Server URL not configured');
-    }
-
-    const url = new URL(`${baseUrl}/api`, window.location.origin);
+    // Always use relative URL - both Vite (dev) and nginx (prod) proxy /api to Mylar
+    const url = new URL('/api', window.location.origin);
     url.searchParams.set('cmd', cmd);
     url.searchParams.set('apikey', this.apiKey);
 
@@ -112,14 +104,8 @@ class MylarAPI {
       throw new Error('API not configured');
     }
 
-    const isDev = import.meta.env.DEV;
-    const baseUrl = isDev ? '' : this.baseUrl;
-
-    if (!isDev && !this.baseUrl) {
-      throw new Error('Server URL not configured');
-    }
-
-    const url = new URL(`${baseUrl}/searchit`, window.location.origin);
+    // Always use relative URL - nginx proxies /searchit to Mylar
+    const url = new URL('/searchit', window.location.origin);
     url.searchParams.set('name', name);
 
     const response = await fetch(url.toString());
@@ -154,11 +140,8 @@ class MylarAPI {
   // Cover art URL helper
   getArtUrl(id) {
     if (!this.apiKey) return '';
-    // In development, use relative URL for proxy
-    const isDev = import.meta.env.DEV;
-    const baseUrl = isDev ? '' : this.baseUrl;
-    if (!isDev && !this.baseUrl) return '';
-    return `${baseUrl}/api?cmd=getArt&id=${id}&apikey=${this.apiKey}`;
+    // Always use relative URL - nginx proxies /api to Mylar
+    return `/api?cmd=getArt&id=${id}&apikey=${this.apiKey}`;
   }
 }
 
