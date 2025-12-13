@@ -1,0 +1,35 @@
+server {
+    listen ${PORT};
+    server_name localhost;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Frontend static files
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Backend API for SQLite (weekly pull list)
+    location /backend/ {
+        proxy_pass http://127.0.0.1:3001/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Mylar API proxy
+    location /api {
+        proxy_pass ${MYLAR_URL}/api;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Mylar search endpoint
+    location /searchit {
+        proxy_pass ${MYLAR_URL}/searchit;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}

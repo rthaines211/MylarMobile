@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mylarmobile:
+    build: .
+    container_name: mylarmobile
+    ports:
+      - "${APP_PORT:-8080}:${APP_PORT:-8080}"
+    environment:
+      - PORT=${APP_PORT:-8080}           # Port inside container
+      - MYLAR_URL=http://mylar:8090      # Change to your Mylar server URL
+    volumes:
+      # Mount Mylar's database directory (read-only)
+      # Change /path/to/mylar/config to your actual Mylar config path
+      - /path/to/mylar/config:/mylar:ro
+    restart: unless-stopped
+
+# If running alongside Mylar in the same docker-compose:
+#
+# services:
+#   mylar:
+#     image: lscr.io/linuxserver/mylar3:latest
+#     container_name: mylar
+#     environment:
+#       - PUID=1000
+#       - PGID=1000
+#       - TZ=America/New_York
+#     volumes:
+#       - /path/to/mylar/config:/config
+#       - /path/to/comics:/comics
+#     ports:
+#       - "8090:8090"
+#     restart: unless-stopped
+#
+#   mylarmobile:
+#     build: .
+#     container_name: mylarmobile
+#     ports:
+#       - "8080:80"
+#     environment:
+#       - MYLAR_URL=http://mylar:8090
+#     volumes:
+#       - /path/to/mylar/config:/mylar:ro
+#     depends_on:
+#       - mylar
+#     restart: unless-stopped
