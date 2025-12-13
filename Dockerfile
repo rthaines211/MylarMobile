@@ -33,11 +33,8 @@ COPY server.js ./
 # Copy built frontend to nginx html directory
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx config template
-COPY nginx.conf.template /etc/nginx/conf.d/default.conf.template
-
-# Remove default nginx config
-RUN rm -f /etc/nginx/http.d/default.conf
+# Copy nginx config template (replaces main nginx.conf)
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
