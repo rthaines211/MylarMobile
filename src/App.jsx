@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import ComicDetail from './pages/ComicDetail';
 import Upcoming from './pages/Upcoming';
 import Wanted from './pages/Wanted';
+import History from './pages/History';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
 
@@ -49,6 +50,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Wanted />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/history"
+        element={
+          <ProtectedRoute>
+            <History />
           </ProtectedRoute>
         }
       />

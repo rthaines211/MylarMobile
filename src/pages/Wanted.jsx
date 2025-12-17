@@ -252,7 +252,7 @@ export default function Wanted() {
   }
 
   return (
-    <Layout title="Wanted" subtitle={`${wanted?.length || 0} missing`}>
+    <Layout title="Wanted" subtitle={`${wanted?.length || 0} missing`} onRefresh={handleRefresh} isRefreshing={isRefetching}>
       <div className="sticky top-0 z-40 bg-bg-primary border-b border-bg-tertiary">
         <div className="flex items-center justify-end px-4 py-2">
           <div className="flex items-center gap-2">

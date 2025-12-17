@@ -267,7 +267,7 @@ export default function Upcoming() {
   const pullCount = weeklyPull?.length || 0;
 
   return (
-    <Layout title="Weekly Pull List">
+    <Layout title="Weekly Pull List" onRefresh={handleRefresh} isRefreshing={isRefetching}>
       <WeekSelector
         weeks={weeks}
         selectedWeek={selectedWeek}

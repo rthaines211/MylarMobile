@@ -212,7 +212,7 @@ export default function ComicDetail() {
             Issues
           </h3>
         </div>
-        <IssueList issues={issues} />
+        <IssueList issues={issues} comicId={id} />
       </div>
       <BottomNav />
     </div>
