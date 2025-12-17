@@ -62,6 +62,23 @@
 - [ ] **Multiple Server Profiles** - Support connecting to multiple Mylar instances
   - Frontend-only (config management)
 
+## Branding & PWA
+
+- [ ] **App Icon - Mylar Style** - Create custom app icon matching Mylar3 branding
+  - iOS: 180x180 touch icon, 152x152 iPad, 120x120 iPhone retina
+  - Android: 192x192 and 512x512 for PWA manifest
+  - Favicon: 32x32, 16x16
+  - Design: Match Mylar3 logo style (comic book aesthetic, yellow/black colors)
+- [ ] **Splash Screens** - Add PWA splash screens for iOS and Android
+  - iOS requires multiple sizes for different devices
+  - Use apple-touch-startup-image meta tags
+- [ ] **Apple Touch Icon** - Proper iOS home screen icon
+  - Add apple-touch-icon link in index.html
+  - Ensure icon displays correctly when added to home screen
+- [ ] **Maskable Icon** - Android adaptive icon support
+  - Create icon with safe zone for different Android launchers
+  - Add to manifest with purpose: "maskable"
+
 ## Technical Improvements
 
 - [ ] **Error Boundary Components** - Add React error boundaries for graceful failure handling
