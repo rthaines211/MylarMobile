@@ -90,3 +90,16 @@ Users configure the app via Settings page:
 - The backend server runs on port 3001 locally, proxied via `/backend`
 - Comic cover images are fetched via `getArt` API command
 - See [FEATURES.md](./FEATURES.md) for planned enhancements
+
+## Deployment Instructions
+
+After pushing changes to git, remind the user to rebuild and restart the Docker container on their Mac:
+
+```bash
+# On the Mac running Docker:
+cd /Volumes/ryanhaines/docker/stacks/trialzone/MylarMobile
+git pull origin main
+docker-compose up -d --build
+```
+
+The `--build` flag is required to rebuild the image with new code changes (Docker caches images otherwise).
