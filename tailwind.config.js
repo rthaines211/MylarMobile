@@ -8,14 +8,14 @@ export default {
     extend: {
       colors: {
         bg: {
-          primary: '#0f0f0f',
-          secondary: '#1a1a1a',
-          tertiary: '#262626'
+          primary: 'var(--bg-primary)',
+          secondary: 'var(--bg-secondary)',
+          tertiary: 'var(--bg-tertiary)'
         },
         text: {
-          primary: '#ffffff',
-          secondary: '#a0a0a0',
-          muted: '#666666'
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          muted: 'var(--text-muted)'
         },
         accent: {
           primary: '#3b82f6',

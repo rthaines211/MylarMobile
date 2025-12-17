@@ -98,6 +98,19 @@ class MylarAPI {
     return this.request('getReadList');
   }
 
+  // Story Arcs
+  getStoryArcs() {
+    return this.request('getStoryArc');
+  }
+
+  getStoryArc(id) {
+    return this.request('getStoryArc', { id });
+  }
+
+  addStoryArc(id) {
+    return this.request('addStoryArc', { id });
+  }
+
   // Search - uses the web searchit endpoint like the Mylar UI
   async searchComics(name) {
     if (!this.apiKey) {

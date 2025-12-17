@@ -6,7 +6,7 @@ import { SkeletonList } from '../components/common/Loading';
 import { useSearchComics, useAddComic } from '../hooks/useMylar';
 import { useConfig } from '../context/ConfigContext';
 import { useToast } from '../components/common/Toast';
-import { Search as SearchIcon, Plus, Loader2, Check } from 'lucide-react';
+import { Search as SearchIcon, Plus, Loader2, Check, Filter, X } from 'lucide-react';
 
 function SearchResultItem({ comic }) {
   const addMutation = useAddComic();
@@ -97,16 +97,32 @@ function SearchResultItem({ comic }) {
 export default function Search() {
   const { isConfigured } = useConfig();
   const [query, setQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [publisherFilter, setPublisherFilter] = useState('');
+  const [yearFilter, setYearFilter] = useState('');
   const { data: results, isLoading, error, isFetching } = useSearchComics(query);
 
-  // Filter to comics with at least 1 issue, then sort like Web UI: (comicyear DESC, issues DESC)
+  // Extract unique publishers and years from results
+  const filterOptions = useMemo(() => {
+    if (!results) return { publishers: [], years: [] };
+    const publishers = [...new Set(results.map((c) => c.publisher).filter(Boolean))].sort();
+    const years = [...new Set(results.map((c) => c.comicyear).filter(Boolean))].sort((a, b) => b - a);
+    return { publishers, years };
+  }, [results]);
+
+  // Filter to comics with at least 1 issue, apply filters, then sort like Web UI: (comicyear DESC, issues DESC)
   const sortedResults = useMemo(() => {
     if (!results) return [];
     return [...results]
       .filter((comic) => {
         // issues is a string in the API response
         const issueCount = parseInt(comic.issues || '0');
-        return issueCount >= 1;
+        if (issueCount < 1) return false;
+        // Apply publisher filter
+        if (publisherFilter && comic.publisher !== publisherFilter) return false;
+        // Apply year filter
+        if (yearFilter && comic.comicyear !== yearFilter) return false;
+        return true;
       })
       .sort((a, b) => {
         // Sort by year descending first
@@ -118,7 +134,14 @@ export default function Search() {
         const issuesB = parseInt(b.issues || '0');
         return issuesB - issuesA;
       });
-  }, [results]);
+  }, [results, publisherFilter, yearFilter]);
+
+  const activeFilterCount = (publisherFilter ? 1 : 0) + (yearFilter ? 1 : 0);
+
+  const clearFilters = () => {
+    setPublisherFilter('');
+    setYearFilter('');
+  };
 
   // Debug logging
   console.log('Search query:', query, 'Results:', results);
@@ -140,13 +163,78 @@ export default function Search() {
 
   return (
     <Layout title="Search">
-      <div className="sticky top-0 z-40 bg-bg-primary p-4 border-b border-bg-tertiary">
-        <SearchBar
-          value={query}
-          onSearch={setQuery}
-          placeholder="Search comics... (press Enter)"
-          autoFocus
-        />
+      <div className="sticky top-0 z-40 bg-bg-primary border-b border-bg-tertiary">
+        <div className="p-4 flex gap-2">
+          <div className="flex-1">
+            <SearchBar
+              value={query}
+              onSearch={setQuery}
+              placeholder="Search comics... (press Enter)"
+              autoFocus
+            />
+          </div>
+          {results?.length > 0 && (
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-3 rounded-xl flex items-center justify-center relative ${
+                showFilters || activeFilterCount > 0
+                  ? 'bg-accent-primary text-white'
+                  : 'bg-bg-secondary text-text-secondary'
+              }`}
+            >
+              <Filter className="w-5 h-5" />
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent-danger text-white text-xs rounded-full flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* Filter Panel */}
+        {showFilters && results?.length > 0 && (
+          <div className="px-4 pb-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-text-secondary">Filters</span>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="text-xs text-accent-primary flex items-center gap-1"
+                >
+                  <X className="w-3 h-3" />
+                  Clear all
+                </button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <select
+                value={publisherFilter}
+                onChange={(e) => setPublisherFilter(e.target.value)}
+                className="flex-1 h-10 px-3 bg-bg-secondary border border-bg-tertiary rounded-lg text-text-primary text-sm focus:outline-none focus:border-accent-primary"
+              >
+                <option value="">All Publishers</option>
+                {filterOptions.publishers.map((pub) => (
+                  <option key={pub} value={pub}>
+                    {pub}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={yearFilter}
+                onChange={(e) => setYearFilter(e.target.value)}
+                className="w-28 h-10 px-3 bg-bg-secondary border border-bg-tertiary rounded-lg text-text-primary text-sm focus:outline-none focus:border-accent-primary"
+              >
+                <option value="">All Years</option>
+                {filterOptions.years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
       </div>
 
       {!query ? (
@@ -172,6 +260,7 @@ export default function Search() {
         <div className="p-4">
           <p className="text-sm text-text-secondary mb-3">
             {sortedResults.length} result{sortedResults.length !== 1 && 's'}
+            {activeFilterCount > 0 && ` (filtered from ${results.length})`}
             {isFetching && ' (updating...)'}
           </p>
           <div className="space-y-2">

@@ -4,6 +4,7 @@ import MylarAPI from '../api/mylar';
 const ConfigContext = createContext(null);
 
 const STORAGE_KEY = 'mylar-config';
+const THEME_KEY = 'mylar-theme';
 const DEFAULT_URL = 'http://100.81.70.9:8090';
 
 export function ConfigProvider({ children }) {
@@ -19,7 +20,28 @@ export function ConfigProvider({ children }) {
     return { serverUrl: DEFAULT_URL, apiKey: '', mylarDbPath: '' };
   });
 
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem(THEME_KEY) || 'dark';
+    } catch (e) {
+      return 'dark';
+    }
+  });
+
   const [isConfigured, setIsConfigured] = useState(false);
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.classList.remove('light', 'dark');
+    if (theme === 'light') {
+      document.documentElement.classList.add('light');
+    }
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch (e) {
+      console.error('Failed to save theme:', e);
+    }
+  }, [theme]);
 
   useEffect(() => {
     try {
@@ -29,6 +51,10 @@ export function ConfigProvider({ children }) {
     }
     setIsConfigured(!!config.serverUrl && !!config.apiKey);
   }, [config]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   const api = useMemo(() => {
     return new MylarAPI(config.serverUrl, config.apiKey);
@@ -53,6 +79,8 @@ export function ConfigProvider({ children }) {
     isConfigured,
     api,
     testConnection,
+    theme,
+    toggleTheme,
   };
 
   return (

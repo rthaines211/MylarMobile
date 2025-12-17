@@ -9,6 +9,9 @@ export const queryKeys = {
   upcoming: ['upcoming'],
   wanted: ['wanted'],
   history: ['history'],
+  readList: ['readList'],
+  storyArcs: ['storyArcs'],
+  storyArc: (id) => ['storyArc', id],
   search: (query) => ['search', query],
   version: ['version'],
   weeklyPull: (week, year) => ['weeklyPull', week, year],
@@ -78,6 +81,62 @@ export function useHistory() {
     queryKey: queryKeys.history,
     queryFn: () => api.getHistory(),
     enabled: isConfigured,
+  });
+}
+
+// Read list
+export function useReadList() {
+  const { api, isConfigured } = useConfig();
+
+  return useQuery({
+    queryKey: queryKeys.readList,
+    queryFn: () => api.getReadList(),
+    enabled: isConfigured,
+  });
+}
+
+// Story arcs list
+export function useStoryArcs() {
+  const { api, isConfigured } = useConfig();
+
+  return useQuery({
+    queryKey: queryKeys.storyArcs,
+    queryFn: () => api.getStoryArcs(),
+    enabled: isConfigured,
+  });
+}
+
+// Single story arc with issues
+export function useStoryArc(id) {
+  const { api, isConfigured } = useConfig();
+
+  return useQuery({
+    queryKey: queryKeys.storyArc(id),
+    queryFn: () => api.getStoryArc(id),
+    enabled: isConfigured && !!id,
+  });
+}
+
+// Batch queue multiple issues
+export function useBatchQueueIssues() {
+  const { api } = useConfig();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (issueIds) => {
+      // Queue all issues in parallel
+      const results = await Promise.allSettled(
+        issueIds.map((id) => api.queueIssue(id))
+      );
+      const succeeded = results.filter((r) => r.status === 'fulfilled').length;
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      return { succeeded, failed, total: issueIds.length };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.wanted });
+      queryClient.invalidateQueries({ queryKey: queryKeys.upcoming });
+      queryClient.invalidateQueries({ queryKey: ['weeklyPull'] });
+    },
   });
 }
 

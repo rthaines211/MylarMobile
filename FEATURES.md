@@ -13,29 +13,33 @@
 - [x] **Sorting on Home** - Add sort options (name, date added, recently updated)
   - API: `getIndex` returns Status, DateAdded, LastUpdated - sort client-side
   - *Implemented: Sort by name (A-Z/Z-A), date added (recent/oldest), recently updated*
-- [ ] **Issue Cover Images** - Display individual issue cover art in IssueList
-  - API: `getArt&id=$issueId` - works for both comic and issue IDs
-  - *Reverted: Using status icons instead for cleaner UI*
 - [x] **Offline Support** - Cache comic data with service worker for offline viewing
   - Frontend-only (PWA service worker caching)
   - *Implemented: Workbox caching strategies for covers, comic data, and lists; offline indicator component*
 
 ## Medium Priority
 
-- [ ] **Story Arcs Support** - Add Story Arcs page to browse and manage reading order
+- [x] **Story Arcs Support** - Add Story Arcs page to browse and manage reading order
   - API: `getStoryArc` (list all), `getStoryArc&id=$arcid` (get issues), `addStoryArc`
-- [ ] **Read List Page** - Implement reading list view
+  - *Implemented: Story Arcs page with arc list and detail view showing issues in reading order*
+- [x] **Read List Page** - Implement reading list view
   - API: `getReadList` - available per wiki
-- [ ] **Batch Queue Operations** - Select multiple wanted issues and queue them all at once
+  - *Implemented: Read List page showing user's reading list with issue covers and status*
+- [x] **Batch Queue Operations** - Select multiple wanted issues and queue them all at once
   - API: Multiple `queueIssue&id=$issueid` calls (no batch endpoint)
-- [ ] **Comic Statistics Dashboard** - Show collection stats (total issues, downloaded %, by publisher)
+  - *Implemented: useBatchQueueIssues hook using Promise.allSettled for parallel queuing*
+- [x] **Comic Statistics Dashboard** - Show collection stats (total issues, downloaded %, by publisher)
   - API: `getIndex` returns HaveTracks/TotalTracks per comic - aggregate client-side
-- [ ] **Dark/Light Theme Toggle** - Add theme switcher in Settings
+  - *Implemented: Statistics page with collection metrics, progress bars, and publisher chart*
+- [x] **Dark/Light Theme Toggle** - Add theme switcher in Settings
   - Frontend-only (CSS variables)
-- [ ] **Search Filters** - Add publisher and year filters to search results
+  - *Implemented: Theme toggle in Settings with CSS variables for seamless switching*
+- [x] **Search Filters** - Add publisher and year filters to search results
   - API: `findComic` returns publisher, comicyear - filter client-side
-- [ ] **Infinite Scroll / Pagination** - Handle large comic libraries with lazy loading
+  - *Implemented: Filter panel with publisher and year dropdowns on Search page*
+- [x] **Infinite Scroll / Pagination** - Handle large comic libraries with lazy loading
   - Frontend-only (virtualization)
+  - *Implemented: useInfiniteScroll hook with Intersection Observer for progressive loading*
 
 ## Low Priority / Nice-to-Have
 

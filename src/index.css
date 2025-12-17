@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme CSS Variables */
+:root {
+  /* Dark theme (default) */
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #262626;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666666;
+}
+
+/* Light theme */
+:root.light {
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e5e5e5;
+  --text-primary: #0f0f0f;
+  --text-secondary: #525252;
+  --text-muted: #a3a3a3;
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
 }
@@ -13,6 +34,9 @@ html, body, #root {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Custom scrollbar for webkit browsers */
@@ -21,11 +45,11 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #404040;
+  background: var(--bg-tertiary);
   border-radius: 2px;
 }
 
@@ -45,7 +69,7 @@ body {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #1a1a1a 25%, #262626 50%, #1a1a1a 75%);
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

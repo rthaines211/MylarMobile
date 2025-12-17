@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { ArrowLeft, Check, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, AlertCircle, Sun, Moon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useConfig } from '../context/ConfigContext';
 
 export default function Settings() {
-  const { config, updateConfig, testConnection, isConfigured } = useConfig();
+  const { config, updateConfig, testConnection, isConfigured, theme, toggleTheme } = useConfig();
   const navigate = useNavigate();
 
   const [serverUrl, setServerUrl] = useState(config.serverUrl);
@@ -103,6 +103,40 @@ export default function Settings() {
             <p className="text-xs text-text-muted">
               Full path to the mylar.db file on the server (e.g., /opt/mylar3/mylar.db)
             </p>
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wide">
+            Appearance
+          </h2>
+
+          <div className="flex items-center justify-between p-4 bg-bg-secondary rounded-xl">
+            <div className="flex items-center gap-3">
+              {theme === 'dark' ? (
+                <Moon className="w-5 h-5 text-accent-primary" />
+              ) : (
+                <Sun className="w-5 h-5 text-accent-warning" />
+              )}
+              <div>
+                <p className="text-text-primary font-medium">Theme</p>
+                <p className="text-sm text-text-secondary">
+                  {theme === 'dark' ? 'Dark mode' : 'Light mode'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={toggleTheme}
+              className={`relative w-14 h-8 rounded-full transition-colors ${
+                theme === 'dark' ? 'bg-accent-primary' : 'bg-bg-tertiary'
+              }`}
+            >
+              <span
+                className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                  theme === 'dark' ? 'left-7' : 'left-1'
+                }`}
+              />
+            </button>
           </div>
         </section>
 

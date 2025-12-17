@@ -9,6 +9,9 @@ import Wanted from './pages/Wanted';
 import History from './pages/History';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
+import StoryArcs from './pages/StoryArcs';
+import ReadList from './pages/ReadList';
+import Statistics from './pages/Statistics';
 
 function ProtectedRoute({ children }) {
   const { isConfigured } = useConfig();
@@ -66,6 +69,30 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Search />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/story-arcs"
+        element={
+          <ProtectedRoute>
+            <StoryArcs />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/read-list"
+        element={
+          <ProtectedRoute>
+            <ReadList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/statistics"
+        element={
+          <ProtectedRoute>
+            <Statistics />
           </ProtectedRoute>
         }
       />
