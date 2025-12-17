@@ -10,12 +10,12 @@
 - [x] **Pull-to-Refresh** - Implement native pull-to-refresh gesture on mobile for all list views
   - Frontend-only (triggers existing refetch)
   - *Implemented: PullToRefresh component added to Layout, enabled on Home, Upcoming, Wanted, History pages*
-- [x] **Sorting & Filtering on Home** - Add sort options (name, date added, status) and filters (Active, Paused, Ended)
-  - API: `getIndex` returns Status, DateAdded - filter/sort client-side
-  - *Implemented: Sort by name, date added, recently updated; Filter by Active/Paused/Ended status*
-- [x] **Issue Cover Images** - Display individual issue cover art in IssueList
+- [x] **Sorting on Home** - Add sort options (name, date added, recently updated)
+  - API: `getIndex` returns Status, DateAdded, LastUpdated - sort client-side
+  - *Implemented: Sort by name (A-Z/Z-A), date added (recent/oldest), recently updated*
+- [ ] **Issue Cover Images** - Display individual issue cover art in IssueList
   - API: `getArt&id=$issueId` - works for both comic and issue IDs
-  - *Implemented: Issue covers with fallback to comic cover, loading states, error handling*
+  - *Reverted: Using status icons instead for cleaner UI*
 - [x] **Offline Support** - Cache comic data with service worker for offline viewing
   - Frontend-only (PWA service worker caching)
   - *Implemented: Workbox caching strategies for covers, comic data, and lists; offline indicator component*
