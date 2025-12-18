@@ -33,5 +33,5 @@ playwright-report/
 test-results/
 .nyc_output/
 
-# Claude Code context
+# Local AI context
 .claude/
