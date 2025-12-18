@@ -45,7 +45,7 @@ export default function CalendarPage() {
 
     // Empty cells before first day
     for (let i = 0; i < firstDay; i++) {
-      days.push({ day: null, key: `empty-${i}` });
+      days.push({ day: null, key: `empty-${i}`, releases: [], dateKey: null, isToday: false });
     }
 
     // Days of the month

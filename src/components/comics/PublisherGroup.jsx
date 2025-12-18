@@ -2,9 +2,15 @@ import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import ComicCard from './ComicCard';
 import ComicListItem from './ComicListItem';
+import { SkeletonGrid } from '../common/Loading';
 
-export default function PublisherGroup({ comics, viewMode = 'grid' }) {
+export default function PublisherGroup({ comics = [], viewMode = 'grid', isLoading = false }) {
   const [expandedPublishers, setExpandedPublishers] = useState({});
+
+  // Show loading skeleton
+  if (isLoading) {
+    return <SkeletonGrid count={8} />;
+  }
 
   // Group comics by publisher
   const publisherGroups = useMemo(() => {
