@@ -22,7 +22,12 @@ A Progressive Web App (PWA) mobile interface for [Mylar3](https://github.com/myl
 
 ## Screenshots
 
-*Coming soon*
+<p align="center">
+  <img src="screenshots/home.png" width="200" alt="Home Page">
+  <img src="screenshots/comic-detail.png" width="200" alt="Comic Detail">
+  <img src="screenshots/search.png" width="200" alt="Search">
+  <img src="screenshots/settings.png" width="200" alt="Settings">
+</p>
 
 ## Quick Start
 
