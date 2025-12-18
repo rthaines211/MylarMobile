@@ -14,10 +14,14 @@ export default function PublisherGroup({ comics = [], viewMode = 'grid', isLoadi
 
   // Group comics by publisher
   const publisherGroups = useMemo(() => {
+    // Ensure comics is an array
+    if (!comics || !Array.isArray(comics)) return [];
+
     const groups = {};
 
     comics.forEach((comic) => {
-      const publisher = comic.ComicPublisher || comic.Publisher || 'Unknown';
+      // Check various field names Mylar API might use (case variations)
+      const publisher = comic.ComicPublisher || comic.Publisher || comic.publisher || 'Unknown';
       if (!groups[publisher]) {
         groups[publisher] = [];
       }

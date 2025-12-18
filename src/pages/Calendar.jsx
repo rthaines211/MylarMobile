@@ -16,7 +16,8 @@ export default function CalendarPage() {
 
   // Group releases by date
   const releasesByDate = useMemo(() => {
-    if (!upcoming) return {};
+    // Ensure upcoming is an array before processing
+    if (!upcoming || !Array.isArray(upcoming)) return {};
 
     const grouped = {};
     upcoming.forEach((issue) => {
