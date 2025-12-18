@@ -68,6 +68,37 @@
 
 ## Branding & PWA
 
+### Navigation Redesign (Option 2: Hybrid Bottom Nav + Hamburger)
+
+- [ ] **Bottom Navigation Bar (Primary)** - Keep bottom nav for 4 most-used pages
+  - Home (library)
+  - Upcoming (releases)
+  - Wanted (missing issues)
+  - Search (find new comics)
+  - Remove History from bottom nav (move to hamburger)
+
+- [ ] **Hamburger Menu (Secondary Pages)** - Slide-out drawer from left side
+  - Triggered by hamburger icon (☰) in header
+  - Contains secondary/less-frequent pages:
+    - **Activity**: History
+    - **Collections**: Story Arcs, Read List
+    - **Insights**: Statistics
+    - **Settings**: Settings (also keep gear icon in header for quick access)
+  - Drawer styling:
+    - App logo/branding at top
+    - Grouped menu items with section headers
+    - Version number at bottom
+    - Dark overlay when open
+    - Slide animation (left to right)
+
+- [ ] **Header Redesign**
+  - Left: Hamburger menu icon (☰)
+  - Center: Page title or app logo on home
+  - Right: Connection status indicator + Settings gear
+  - Remove the current "More" dropdown menu (replaced by hamburger)
+
+### App Icons & Branding
+
 - [ ] **App Icon - Mylar Style** - Create custom app icon matching Mylar3 branding
   - iOS: 180x180 touch icon, 152x152 iPad, 120x120 iPhone retina
   - Android: 192x192 and 512x512 for PWA manifest
