@@ -166,41 +166,74 @@ export function useAddComic() {
   });
 }
 
-// Delete comic mutation
+// Delete comic mutation with optimistic update
 export function useDeleteComic() {
   const { api } = useConfig();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id) => api.delComic(id),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.comics });
+      const previousComics = queryClient.getQueryData(queryKeys.comics);
+      queryClient.setQueryData(queryKeys.comics, (old) =>
+        old?.filter((comic) => comic.ComicID !== id && comic.id !== id)
+      );
+      return { previousComics };
+    },
+    onError: (err, id, context) => {
+      queryClient.setQueryData(queryKeys.comics, context?.previousComics);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.comics });
     },
   });
 }
 
-// Pause comic mutation
+// Pause comic mutation with optimistic update
 export function usePauseComic() {
   const { api } = useConfig();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id) => api.pauseComic(id),
-    onSuccess: (_, id) => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.comic(id) });
+      const previousComic = queryClient.getQueryData(queryKeys.comic(id));
+      queryClient.setQueryData(queryKeys.comic(id), (old) =>
+        old ? { ...old, Status: 'Paused' } : old
+      );
+      return { previousComic };
+    },
+    onError: (err, id, context) => {
+      queryClient.setQueryData(queryKeys.comic(id), context?.previousComic);
+    },
+    onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.comic(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.comics });
     },
   });
 }
 
-// Resume comic mutation
+// Resume comic mutation with optimistic update
 export function useResumeComic() {
   const { api } = useConfig();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id) => api.resumeComic(id),
-    onSuccess: (_, id) => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.comic(id) });
+      const previousComic = queryClient.getQueryData(queryKeys.comic(id));
+      queryClient.setQueryData(queryKeys.comic(id), (old) =>
+        old ? { ...old, Status: 'Active' } : old
+      );
+      return { previousComic };
+    },
+    onError: (err, id, context) => {
+      queryClient.setQueryData(queryKeys.comic(id), context?.previousComic);
+    },
+    onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.comic(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.comics });
     },
@@ -314,5 +347,104 @@ export function useWeeklyWeeks() {
       return data.data;
     },
     enabled: !!mylarDbPath,
+  });
+}
+
+// Change issue status mutation
+export function useChangeStatus() {
+  const { api } = useConfig();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status }) => api.changeStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.wanted });
+      queryClient.invalidateQueries({ queryKey: queryKeys.upcoming });
+      queryClient.invalidateQueries({ queryKey: ['weeklyPull'] });
+    },
+  });
+}
+
+// Recheck files mutation
+export function useRecheckFiles() {
+  const { api } = useConfig();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id) => api.recheckFiles(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.comic(id) });
+    },
+  });
+}
+
+// Logs query
+export function useLogs() {
+  const { api, isConfigured } = useConfig();
+
+  return useQuery({
+    queryKey: ['logs'],
+    queryFn: () => api.getLogs(),
+    enabled: isConfigured,
+    refetchInterval: 10000, // Refresh every 10 seconds
+  });
+}
+
+// Clear logs mutation
+export function useClearLogs() {
+  const { api } = useConfig();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => api.clearLogs(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['logs'] });
+    },
+  });
+}
+
+// Server restart mutation
+export function useServerRestart() {
+  const { api } = useConfig();
+
+  return useMutation({
+    mutationFn: () => api.restart(),
+  });
+}
+
+// Server shutdown mutation
+export function useServerShutdown() {
+  const { api } = useConfig();
+
+  return useMutation({
+    mutationFn: () => api.shutdown(),
+  });
+}
+
+// Server update mutation
+export function useServerUpdate() {
+  const { api } = useConfig();
+
+  return useMutation({
+    mutationFn: () => api.update(),
+  });
+}
+
+// Download issue - returns download URL
+export function useDownloadIssue() {
+  const { api } = useConfig();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      const url = await api.downloadIssue(id);
+      // Trigger browser download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = '';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return url;
+    },
   });
 }

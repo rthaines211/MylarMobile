@@ -1,13 +1,15 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import Layout from '../components/layout/Layout';
 import ComicList from '../components/comics/ComicList';
+import PublisherGroup from '../components/comics/PublisherGroup';
 import ErrorMessage from '../components/common/ErrorMessage';
 import { useComics } from '../hooks/useMylar';
 import { useConfig } from '../context/ConfigContext';
-import { RefreshCw, LayoutGrid, List, ArrowUpDown, X } from 'lucide-react';
+import { RefreshCw, LayoutGrid, List, ArrowUpDown, X, FolderOpen } from 'lucide-react';
 
 const VIEW_MODE_KEY = 'mylar-home-view-mode';
 const SORT_KEY = 'mylar-home-sort';
+const GROUP_KEY = 'mylar-home-group';
 
 const SORT_OPTIONS = [
   { value: 'name-asc', label: 'Name (A-Z)' },
@@ -27,6 +29,9 @@ export default function Home() {
     return localStorage.getItem(SORT_KEY) || 'name-asc';
   });
   const [showSort, setShowSort] = useState(false);
+  const [groupByPublisher, setGroupByPublisher] = useState(() => {
+    return localStorage.getItem(GROUP_KEY) === 'true';
+  });
 
   useEffect(() => {
     localStorage.setItem(VIEW_MODE_KEY, viewMode);
@@ -35,6 +40,10 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem(SORT_KEY, sortBy);
   }, [sortBy]);
+
+  useEffect(() => {
+    localStorage.setItem(GROUP_KEY, groupByPublisher.toString());
+  }, [groupByPublisher]);
 
   const handleRefresh = useCallback(() => {
     refetch();
@@ -120,11 +129,19 @@ export default function Home() {
           </p>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setGroupByPublisher(!groupByPublisher)}
+              className={`p-1.5 rounded-lg ${groupByPublisher ? 'bg-accent-primary/10 text-accent-primary' : 'bg-bg-tertiary text-text-secondary'}`}
+              title={groupByPublisher ? 'Flat List' : 'Group by Publisher'}
+            >
+              <FolderOpen className="w-4 h-4" />
+            </button>
+            <button
               onClick={() => setShowSort(!showSort)}
               className={`p-1.5 rounded-lg ${showSort ? 'bg-accent-primary/10 text-accent-primary' : 'bg-bg-tertiary text-text-secondary'}`}
               title="Sort"
+              disabled={groupByPublisher}
             >
-              <ArrowUpDown className="w-4 h-4" />
+              <ArrowUpDown className={`w-4 h-4 ${groupByPublisher ? 'opacity-50' : ''}`} />
             </button>
             <button
               onClick={toggleViewMode}
@@ -183,18 +200,34 @@ export default function Home() {
         )}
 
         {/* Active sort indicator */}
-        {!showSort && sortBy !== 'name-asc' && (
+        {!showSort && sortBy !== 'name-asc' && !groupByPublisher && (
           <div className="px-4 py-1.5 bg-bg-secondary border-t border-bg-tertiary text-xs text-text-muted">
             Sorted by: {activeSortLabel}
           </div>
         )}
+
+        {/* Group indicator */}
+        {groupByPublisher && (
+          <div className="px-4 py-1.5 bg-bg-secondary border-t border-bg-tertiary text-xs text-text-muted">
+            Grouped by publisher
+          </div>
+        )}
       </div>
-      <ComicList
-        comics={sortedComics}
-        isLoading={isLoading}
-        viewMode={viewMode}
-        emptyMessage="Add comics to your watchlist using the Search tab"
-      />
+
+      {groupByPublisher ? (
+        <PublisherGroup
+          comics={comics || []}
+          viewMode={viewMode}
+          isLoading={isLoading}
+        />
+      ) : (
+        <ComicList
+          comics={sortedComics}
+          isLoading={isLoading}
+          viewMode={viewMode}
+          emptyMessage="Add comics to your watchlist using the Search tab"
+        />
+      )}
     </Layout>
   );
 }

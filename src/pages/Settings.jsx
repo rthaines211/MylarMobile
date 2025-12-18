@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ArrowLeft, Check, Loader2, AlertCircle, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, AlertCircle, Sun, Moon, Download, Upload, Power, RefreshCw, ArrowUpCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useConfig } from '../context/ConfigContext';
+import { useServerRestart, useServerShutdown, useServerUpdate } from '../hooks/useMylar';
 
 export default function Settings() {
   const { config, updateConfig, testConnection, isConfigured, theme, toggleTheme } = useConfig();
@@ -13,16 +14,15 @@ export default function Settings() {
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
 
-  const handleTest = async () => {
-    // Temporarily update config for testing
-    updateConfig({ serverUrl, apiKey });
+  const restartMutation = useServerRestart();
+  const shutdownMutation = useServerShutdown();
+  const updateMutation = useServerUpdate();
 
+  const handleTest = async () => {
+    updateConfig({ serverUrl, apiKey });
     setTesting(true);
     setTestResult(null);
-
-    // Small delay to ensure config is updated
     await new Promise((resolve) => setTimeout(resolve, 100));
-
     const result = await testConnection();
     setTestResult(result);
     setTesting(false);
@@ -35,7 +35,92 @@ export default function Settings() {
     }
   };
 
+  // Server Management
+  const handleRestart = async () => {
+    if (window.confirm('Are you sure you want to restart Mylar?\n\nThe server will be temporarily unavailable.')) {
+      try {
+        await restartMutation.mutateAsync();
+        alert('Restart command sent. Mylar is restarting...');
+      } catch (error) {
+        alert('Failed to restart: ' + error.message);
+      }
+    }
+  };
+
+  const handleShutdown = async () => {
+    if (window.confirm('Are you sure you want to SHUTDOWN Mylar?\n\nYou will need to manually start it again!')) {
+      if (window.confirm('This will STOP the Mylar server. Are you absolutely sure?')) {
+        try {
+          await shutdownMutation.mutateAsync();
+          alert('Shutdown command sent. Mylar is shutting down...');
+        } catch (error) {
+          alert('Failed to shutdown: ' + error.message);
+        }
+      }
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (window.confirm('Check for Mylar updates?\n\nThis will restart Mylar if an update is found.')) {
+      try {
+        await updateMutation.mutateAsync();
+        alert('Update check initiated. Mylar will restart if an update is available.');
+      } catch (error) {
+        alert('Failed to update: ' + error.message);
+      }
+    }
+  };
+
+  // Import/Export Settings
+  const handleExport = () => {
+    const exportData = {
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      config: {
+        serverUrl: config.serverUrl,
+        apiKey: config.apiKey,
+        mylarDbPath: config.mylarDbPath,
+      },
+      theme,
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mylar-mobile-settings-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target?.result);
+        if (data.config) {
+          setServerUrl(data.config.serverUrl || '');
+          setApiKey(data.config.apiKey || '');
+          setMylarDbPath(data.config.mylarDbPath || '');
+          alert('Settings imported successfully. Click "Save Settings" to apply.');
+        } else {
+          alert('Invalid settings file format.');
+        }
+      } catch (error) {
+        alert('Failed to parse settings file: ' + error.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   const hasChanges = serverUrl !== config.serverUrl || apiKey !== config.apiKey || mylarDbPath !== config.mylarDbPath;
+  const isServerBusy = restartMutation.isPending || shutdownMutation.isPending || updateMutation.isPending;
 
   return (
     <div className="min-h-screen bg-bg-primary">
@@ -48,16 +133,15 @@ export default function Settings() {
         </div>
       </header>
 
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-6 pb-24">
+        {/* Server Configuration */}
         <section className="space-y-4">
           <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wide">
             Server Configuration
           </h2>
 
           <div className="space-y-2">
-            <label className="block text-sm text-text-secondary">
-              Mylar Server URL
-            </label>
+            <label className="block text-sm text-text-secondary">Mylar Server URL</label>
             <input
               type="url"
               value={serverUrl}
@@ -68,9 +152,7 @@ export default function Settings() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm text-text-secondary">
-              API Key
-            </label>
+            <label className="block text-sm text-text-secondary">API Key</label>
             <input
               type="password"
               value={apiKey}
@@ -79,20 +161,19 @@ export default function Settings() {
               className="w-full h-12 px-4 bg-bg-secondary border border-bg-tertiary rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-primary"
             />
             <p className="text-xs text-text-muted">
-              Find your API key in Mylar's Web Interface → Config → Web Interface → API Key
+              Find your API key in Mylar's Config → Web Interface → API Key
             </p>
           </div>
         </section>
 
+        {/* Weekly Pull List */}
         <section className="space-y-4">
           <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wide">
             Weekly Pull List
           </h2>
 
           <div className="space-y-2">
-            <label className="block text-sm text-text-secondary">
-              Mylar Database Path
-            </label>
+            <label className="block text-sm text-text-secondary">Mylar Database Path</label>
             <input
               type="text"
               value={mylarDbPath}
@@ -101,11 +182,12 @@ export default function Settings() {
               className="w-full h-12 px-4 bg-bg-secondary border border-bg-tertiary rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-primary"
             />
             <p className="text-xs text-text-muted">
-              Full path to the mylar.db file on the server (e.g., /opt/mylar3/mylar.db)
+              Full path to the mylar.db file on the server
             </p>
           </div>
         </section>
 
+        {/* Appearance */}
         <section className="space-y-4">
           <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wide">
             Appearance
@@ -140,6 +222,77 @@ export default function Settings() {
           </div>
         </section>
 
+        {/* Server Management */}
+        {isConfigured && (
+          <section className="space-y-4">
+            <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wide">
+              Server Management
+            </h2>
+
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={handleRestart}
+                disabled={isServerBusy}
+                className="flex flex-col items-center gap-2 p-4 bg-bg-secondary rounded-xl active:bg-bg-tertiary disabled:opacity-50"
+              >
+                <RefreshCw className={`w-6 h-6 text-accent-warning ${restartMutation.isPending ? 'animate-spin' : ''}`} />
+                <span className="text-xs text-text-secondary">Restart</span>
+              </button>
+
+              <button
+                onClick={handleUpdate}
+                disabled={isServerBusy}
+                className="flex flex-col items-center gap-2 p-4 bg-bg-secondary rounded-xl active:bg-bg-tertiary disabled:opacity-50"
+              >
+                <ArrowUpCircle className={`w-6 h-6 text-accent-primary ${updateMutation.isPending ? 'animate-pulse' : ''}`} />
+                <span className="text-xs text-text-secondary">Update</span>
+              </button>
+
+              <button
+                onClick={handleShutdown}
+                disabled={isServerBusy}
+                className="flex flex-col items-center gap-2 p-4 bg-bg-secondary rounded-xl active:bg-bg-tertiary disabled:opacity-50"
+              >
+                <Power className={`w-6 h-6 text-accent-danger ${shutdownMutation.isPending ? 'animate-pulse' : ''}`} />
+                <span className="text-xs text-text-secondary">Shutdown</span>
+              </button>
+            </div>
+
+            <p className="text-xs text-text-muted text-center">
+              Use with caution. These actions affect the Mylar server.
+            </p>
+          </section>
+        )}
+
+        {/* Backup & Restore */}
+        <section className="space-y-4">
+          <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wide">
+            Backup & Restore
+          </h2>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={handleExport}
+              className="flex items-center justify-center gap-2 p-4 bg-bg-secondary rounded-xl active:bg-bg-tertiary"
+            >
+              <Download className="w-5 h-5 text-accent-primary" />
+              <span className="text-text-primary">Export</span>
+            </button>
+
+            <label className="flex items-center justify-center gap-2 p-4 bg-bg-secondary rounded-xl active:bg-bg-tertiary cursor-pointer">
+              <Upload className="w-5 h-5 text-accent-success" />
+              <span className="text-text-primary">Import</span>
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImport}
+                className="hidden"
+              />
+            </label>
+          </div>
+        </section>
+
+        {/* Test Result */}
         {testResult && (
           <div
             className={`p-4 rounded-xl ${
@@ -155,11 +308,7 @@ export default function Settings() {
                 <AlertCircle className="w-5 h-5 text-accent-danger flex-shrink-0 mt-0.5" />
               )}
               <div>
-                <p
-                  className={`font-medium ${
-                    testResult.success ? 'text-accent-success' : 'text-accent-danger'
-                  }`}
-                >
+                <p className={`font-medium ${testResult.success ? 'text-accent-success' : 'text-accent-danger'}`}>
                   {testResult.success ? 'Connection successful!' : 'Connection failed'}
                 </p>
                 {testResult.success && testResult.data && (
@@ -175,6 +324,7 @@ export default function Settings() {
           </div>
         )}
 
+        {/* Action Buttons */}
         <div className="space-y-3">
           <button
             onClick={handleTest}

@@ -8,8 +8,11 @@ import {
   Trash2,
   Loader2,
   MoreVertical,
+  FileSearch,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
-import { useComic, useRefreshComic, usePauseComic, useResumeComic, useDeleteComic } from '../hooks/useMylar';
+import { useComic, useComicInfo, useRefreshComic, usePauseComic, useResumeComic, useDeleteComic, useRecheckFiles } from '../hooks/useMylar';
 import { useConfig } from '../context/ConfigContext';
 import IssueList from '../components/comics/IssueList';
 import BottomNav from '../components/layout/BottomNav';
@@ -22,12 +25,15 @@ export default function ComicDetail() {
   const { api } = useConfig();
   const [showMenu, setShowMenu] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   const { data, isLoading, error, refetch } = useComic(id);
+  const { data: comicInfo } = useComicInfo(id);
   const refreshMutation = useRefreshComic();
   const pauseMutation = usePauseComic();
   const resumeMutation = useResumeComic();
   const deleteMutation = useDeleteComic();
+  const recheckMutation = useRecheckFiles();
 
   // comic is returned as an array with one element
   const comic = data?.comic?.[0] || data?.comic || data;
@@ -41,6 +47,7 @@ export default function ComicDetail() {
 
   const coverUrl = comic?.imageURL || api.getArtUrl(id);
   const isPaused = comic?.status === 'Paused';
+  const description = comicInfo?.description || comic?.description || '';
 
   const handleRefresh = () => {
     refreshMutation.mutate(id);
@@ -61,6 +68,11 @@ export default function ComicDetail() {
         onSuccess: () => navigate('/'),
       });
     }
+    setShowMenu(false);
+  };
+
+  const handleRecheckFiles = () => {
+    recheckMutation.mutate(id);
     setShowMenu(false);
   };
 
@@ -146,6 +158,14 @@ export default function ComicDetail() {
                       )}
                     </button>
                     <button
+                      onClick={handleRecheckFiles}
+                      disabled={recheckMutation.isPending}
+                      className="flex items-center gap-3 w-full px-4 py-3 text-left text-text-primary hover:bg-bg-tertiary disabled:opacity-50"
+                    >
+                      <FileSearch className={`w-4 h-4 ${recheckMutation.isPending ? 'animate-pulse' : ''}`} />
+                      {recheckMutation.isPending ? 'Rechecking...' : 'Recheck Files'}
+                    </button>
+                    <button
                       onClick={handleDelete}
                       className="flex items-center gap-3 w-full px-4 py-3 text-left text-accent-danger hover:bg-bg-tertiary"
                     >
@@ -204,6 +224,43 @@ export default function ComicDetail() {
           </div>
         </div>
       </div>
+
+      {/* Description/Synopsis */}
+      {description && (
+        <div className="px-4 py-3 bg-bg-secondary mt-px">
+          <h3 className="text-sm font-medium text-text-secondary uppercase tracking-wide mb-2">
+            Synopsis
+          </h3>
+          <div className="relative">
+            <p
+              className={`text-sm text-text-primary leading-relaxed ${
+                !showFullDescription ? 'line-clamp-3' : ''
+              }`}
+              dangerouslySetInnerHTML={{
+                __html: description.replace(/<[^>]*>/g, '').substring(0, showFullDescription ? undefined : 300)
+              }}
+            />
+            {description.length > 300 && (
+              <button
+                onClick={() => setShowFullDescription(!showFullDescription)}
+                className="flex items-center gap-1 mt-2 text-xs text-accent-primary"
+              >
+                {showFullDescription ? (
+                  <>
+                    <ChevronUp className="w-3 h-3" />
+                    Show less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-3 h-3" />
+                    Read more
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Issues */}
       <div className="mt-2">

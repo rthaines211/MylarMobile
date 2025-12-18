@@ -150,6 +150,42 @@ class MylarAPI {
     return this.request('getLogs');
   }
 
+  clearLogs() {
+    return this.request('clearLogs');
+  }
+
+  // Server management
+  restart() {
+    return this.request('restart');
+  }
+
+  shutdown() {
+    return this.request('shutdown');
+  }
+
+  update() {
+    return this.request('update');
+  }
+
+  // File operations
+  recheckFiles(id) {
+    return this.request('recheckFiles', { id });
+  }
+
+  // Issue status
+  changeStatus(id, status) {
+    return this.request('changeStatus', { id, status });
+  }
+
+  // Download issue file
+  async downloadIssue(id) {
+    if (!this.apiKey) {
+      throw new Error('API not configured');
+    }
+    // Return the download URL - browser will handle the file download
+    return `/api?cmd=downloadIssue&id=${id}&apikey=${this.apiKey}`;
+  }
+
   // Cover art URL helper
   getArtUrl(id) {
     if (!this.apiKey) return '';
