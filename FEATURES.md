@@ -70,14 +70,15 @@
 
 ### Navigation Redesign (Option 2: Hybrid Bottom Nav + Hamburger)
 
-- [ ] **Bottom Navigation Bar (Primary)** - Keep bottom nav for 4 most-used pages
+- [x] **Bottom Navigation Bar (Primary)** - Keep bottom nav for 4 most-used pages
   - Home (library)
   - Upcoming (releases)
   - Wanted (missing issues)
   - Search (find new comics)
   - Remove History from bottom nav (move to hamburger)
+  - *Implemented: BottomNav reduced to 4 items*
 
-- [ ] **Hamburger Menu (Secondary Pages)** - Slide-out drawer from left side
+- [x] **Hamburger Menu (Secondary Pages)** - Slide-out drawer from left side
   - Triggered by hamburger icon (☰) in header
   - Contains secondary/less-frequent pages:
     - **Activity**: History
@@ -90,29 +91,34 @@
     - Version number at bottom
     - Dark overlay when open
     - Slide animation (left to right)
+  - *Implemented: HamburgerMenu component with all features*
 
-- [ ] **Header Redesign**
+- [x] **Header Redesign**
   - Left: Hamburger menu icon (☰)
   - Center: Page title or app logo on home
   - Right: Connection status indicator + Settings gear
   - Remove the current "More" dropdown menu (replaced by hamburger)
+  - *Implemented: Header with hamburger trigger, centered title, settings gear retained*
 
 ### App Icons & Branding
 
-- [ ] **App Icon - Mylar Style** - Create custom app icon matching Mylar3 branding
+- [x] **App Icon - Mylar Style** - Create custom app icon matching Mylar3 branding
   - iOS: 180x180 touch icon, 152x152 iPad, 120x120 iPhone retina
   - Android: 192x192 and 512x512 for PWA manifest
   - Favicon: 32x32, 16x16
   - Design: Match Mylar3 logo style (comic book aesthetic, yellow/black colors)
+  - *Implemented: New SVG icon with yellow/black comic book aesthetic, all PNG sizes generated*
 - [ ] **Splash Screens** - Add PWA splash screens for iOS and Android
   - iOS requires multiple sizes for different devices
   - Use apple-touch-startup-image meta tags
-- [ ] **Apple Touch Icon** - Proper iOS home screen icon
+- [x] **Apple Touch Icon** - Proper iOS home screen icon
   - Add apple-touch-icon link in index.html
   - Ensure icon displays correctly when added to home screen
-- [ ] **Maskable Icon** - Android adaptive icon support
+  - *Implemented: 180x180 apple-touch-icon with proper meta tags*
+- [x] **Maskable Icon** - Android adaptive icon support
   - Create icon with safe zone for different Android launchers
   - Add to manifest with purpose: "maskable"
+  - *Implemented: icon-512-maskable.png with safe zone padding*
 
 ## Technical Improvements
 

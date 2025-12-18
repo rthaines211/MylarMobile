@@ -1,11 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Calendar, AlertCircle, Clock, Search } from 'lucide-react';
+import { Home, Calendar, AlertCircle, Search } from 'lucide-react';
 
 const navItems = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/upcoming', icon: Calendar, label: 'Upcoming' },
   { to: '/wanted', icon: AlertCircle, label: 'Wanted' },
-  { to: '/history', icon: Clock, label: 'History' },
   { to: '/search', icon: Search, label: 'Search' },
 ];
 

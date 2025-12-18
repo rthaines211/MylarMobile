@@ -12,8 +12,8 @@ export default defineConfig({
         name: 'Mylar Mobile',
         short_name: 'Mylar',
         description: 'Mobile interface for Mylar3 comic book manager',
-        theme_color: '#0f0f0f',
-        background_color: '#0f0f0f',
+        theme_color: '#1a1a1a',
+        background_color: '#1a1a1a',
         display: 'standalone',
         icons: [
           {
@@ -27,7 +27,7 @@ export default defineConfig({
             type: 'image/png'
           },
           {
-            src: 'icons/icon-512.png',
+            src: 'icons/icon-512-maskable.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'

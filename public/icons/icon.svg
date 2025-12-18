@@ -1,4 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="64" fill="#0f0f0f"/>
-  <text x="256" y="320" font-family="system-ui" font-size="200" font-weight="bold" fill="#3b82f6" text-anchor="middle">M</text>
+  <!-- Background with comic book style -->
+  <rect width="512" height="512" rx="80" fill="#1a1a1a"/>
+
+  <!-- Yellow accent border -->
+  <rect x="16" y="16" width="480" height="480" rx="64" fill="none" stroke="#fbbf24" stroke-width="8"/>
+
+  <!-- Comic book page shape -->
+  <path d="M80 100 L432 80 L440 432 L72 420 Z" fill="#0f0f0f" stroke="#fbbf24" stroke-width="4"/>
+
+  <!-- Inner page highlight -->
+  <path d="M96 116 L416 98 L422 414 L88 404 Z" fill="#1f1f1f"/>
+
+  <!-- Bold M letter with comic style -->
+  <text x="256" y="320" font-family="Impact, Arial Black, sans-serif" font-size="220" font-weight="900" fill="#fbbf24" text-anchor="middle" letter-spacing="-10">M</text>
+
+  <!-- Comic action lines -->
+  <g stroke="#fbbf24" stroke-width="3" opacity="0.6">
+    <line x1="60" y1="60" x2="100" y2="100"/>
+    <line x1="452" y1="60" x2="412" y2="100"/>
+    <line x1="60" y1="452" x2="100" y2="412"/>
+    <line x1="452" y1="452" x2="412" y2="412"/>
+  </g>
+
+  <!-- Small accent dots (halftone style) -->
+  <g fill="#fbbf24" opacity="0.3">
+    <circle cx="440" cy="140" r="6"/>
+    <circle cx="460" cy="160" r="4"/>
+    <circle cx="72" cy="372" r="6"/>
+    <circle cx="52" cy="352" r="4"/>
+  </g>
 </svg>
