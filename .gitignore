@@ -32,6 +32,3 @@ coverage/
 playwright-report/
 test-results/
 .nyc_output/
-
-# Local AI context
-.claude/
