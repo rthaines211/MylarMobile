@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 export default class ErrorBoundary extends Component {
   constructor(props) {
@@ -20,6 +19,12 @@ export default class ErrorBoundary extends Component {
 
   handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
+  };
+
+  handleGoHome = () => {
+    // Use window.location instead of React Router since ErrorBoundary
+    // is outside the BrowserRouter context
+    window.location.href = '/';
   };
 
   render() {
@@ -56,14 +61,13 @@ export default class ErrorBoundary extends Component {
                 Try Again
               </button>
 
-              <Link
-                to="/"
-                onClick={this.handleReset}
+              <button
+                onClick={this.handleGoHome}
                 className="flex items-center gap-2 px-4 py-2 bg-bg-tertiary text-text-primary rounded-lg active:opacity-80"
               >
                 <Home className="w-4 h-4" />
                 Go Home
-              </Link>
+              </button>
             </div>
           </div>
         </div>

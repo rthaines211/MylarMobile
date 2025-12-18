@@ -10,7 +10,6 @@ import History from './pages/History';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
 import StoryArcs from './pages/StoryArcs';
-import ReadList from './pages/ReadList';
 import Statistics from './pages/Statistics';
 import Calendar from './pages/Calendar';
 import Logs from './pages/Logs';
@@ -79,14 +78,6 @@ export default function App() {
         element={
           <ProtectedRoute>
             <StoryArcs />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/read-list"
-        element={
-          <ProtectedRoute>
-            <ReadList />
           </ProtectedRoute>
         }
       />
