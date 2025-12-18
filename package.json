@@ -1,7 +1,27 @@
 {
   "name": "mylar-mobile",
-  "private": true,
   "version": "1.0.0",
+  "description": "A Progressive Web App mobile interface for Mylar3 comic book manager",
+  "author": "Ryan Haines",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rthaines211/MylarMobile.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rthaines211/MylarMobile/issues"
+  },
+  "homepage": "https://github.com/rthaines211/MylarMobile#readme",
+  "keywords": [
+    "mylar",
+    "mylar3",
+    "comics",
+    "comic-books",
+    "pwa",
+    "mobile",
+    "react",
+    "docker"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",

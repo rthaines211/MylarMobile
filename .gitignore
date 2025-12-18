@@ -26,3 +26,12 @@ npm-debug.log*
 
 # Local config
 .env.local
+
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
+.nyc_output/
+
+# Claude Code context
+.claude/
