@@ -32,11 +32,9 @@ const STATUS_CONFIG = {
 const STATUS_OPTIONS = ['All', 'Downloaded', 'Wanted', 'Snatched', 'Skipped', 'Mismatched'];
 
 const SORT_OPTIONS = [
-  { value: 'date', label: 'Ship Date' },
   { value: 'comic-asc', label: 'Comic (A-Z)' },
   { value: 'comic-desc', label: 'Comic (Z-A)' },
   { value: 'publisher', label: 'Publisher' },
-  { value: 'status', label: 'Status' },
 ];
 
 function WeeklyItem({ issue }) {
@@ -177,31 +175,6 @@ function WeekSelector({ weeks, selectedWeek, onSelectWeek }) {
   );
 }
 
-function groupByDate(issues) {
-  const groups = {};
-
-  issues.forEach((issue) => {
-    const date = issue.SHIPDATE;
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(issue);
-  });
-
-  return Object.entries(groups)
-    .sort(([a], [b]) => new Date(b) - new Date(a))
-    .map(([date, items]) => ({
-      date,
-      items: items.sort((a, b) => {
-        // Sort by publisher, then comic name
-        if (a.PUBLISHER !== b.PUBLISHER) {
-          return a.PUBLISHER.localeCompare(b.PUBLISHER);
-        }
-        return a.COMIC.localeCompare(b.COMIC);
-      }),
-    }));
-}
-
 export default function Upcoming() {
   const { config, isConfigured } = useConfig();
   const { mylarDbPath, serverUrl } = config;
@@ -210,7 +183,7 @@ export default function Upcoming() {
   const [selectedWeek, setSelectedWeek] = useState(null);
   const [statusFilter, setStatusFilter] = useState('All');
   const [publisherFilter, setPublisherFilter] = useState('');
-  const [sortBy, setSortBy] = useState('date');
+  const [sortBy, setSortBy] = useState('comic-asc');
   const [showFilters, setShowFilters] = useState(false);
 
   const {
@@ -258,17 +231,16 @@ export default function Upcoming() {
     // Apply sorting
     result.sort((a, b) => {
       switch (sortBy) {
-        case 'comic-asc':
-          return (a.COMIC || '').localeCompare(b.COMIC || '');
         case 'comic-desc':
           return (b.COMIC || '').localeCompare(a.COMIC || '');
         case 'publisher':
-          return (a.PUBLISHER || '').localeCompare(b.PUBLISHER || '');
-        case 'status':
-          return (a.STATUS || '').localeCompare(b.STATUS || '');
-        case 'date':
+          // Sort by publisher, then by comic name within publisher
+          const pubCompare = (a.PUBLISHER || '').localeCompare(b.PUBLISHER || '');
+          if (pubCompare !== 0) return pubCompare;
+          return (a.COMIC || '').localeCompare(b.COMIC || '');
+        case 'comic-asc':
         default:
-          return new Date(b.SHIPDATE) - new Date(a.SHIPDATE);
+          return (a.COMIC || '').localeCompare(b.COMIC || '');
       }
     });
 
@@ -282,10 +254,10 @@ export default function Upcoming() {
   const clearFilters = () => {
     setStatusFilter('All');
     setPublisherFilter('');
-    setSortBy('date');
+    setSortBy('comic-asc');
   };
 
-  const hasActiveFilters = statusFilter !== 'All' || publisherFilter || sortBy !== 'date';
+  const hasActiveFilters = statusFilter !== 'All' || publisherFilter || sortBy !== 'comic-asc';
 
   if (!isConfigured) {
     return (
@@ -331,7 +303,6 @@ export default function Upcoming() {
     );
   }
 
-  const groups = filteredAndSorted.length > 0 ? groupByDate(filteredAndSorted) : [];
   const pullCount = weeklyPull?.length || 0;
   const filteredCount = filteredAndSorted.length;
 
@@ -451,7 +422,7 @@ export default function Upcoming() {
             {publisherFilter && (
               <span className="px-1.5 py-0.5 bg-bg-tertiary rounded truncate max-w-[120px]">{publisherFilter}</span>
             )}
-            {sortBy !== 'date' && (
+            {sortBy !== 'comic-asc' && (
               <span className="px-1.5 py-0.5 bg-bg-tertiary rounded">
                 {SORT_OPTIONS.find((s) => s.value === sortBy)?.label}
               </span>
@@ -460,30 +431,16 @@ export default function Upcoming() {
         )}
       </div>
 
-      {groups.length === 0 ? (
+      {filteredAndSorted.length === 0 ? (
         <EmptyState
           icon={Calendar}
           title="No issues on your pull list"
           message="Comics you're tracking will appear here when they release"
         />
       ) : (
-        <div className="p-4 space-y-6">
-          {groups.map(({ date, items }) => (
-            <div key={date}>
-              <h3 className="text-sm font-medium text-text-secondary mb-3">
-                {new Date(date).toLocaleDateString(undefined, {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
-              </h3>
-              <div className="space-y-2">
-                {items.map((issue) => (
-                  <WeeklyItem key={issue.rowid} issue={issue} />
-                ))}
-              </div>
-            </div>
+        <div className="p-4 space-y-2">
+          {filteredAndSorted.map((issue) => (
+            <WeeklyItem key={issue.rowid} issue={issue} />
           ))}
         </div>
       )}
