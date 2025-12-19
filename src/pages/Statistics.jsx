@@ -109,10 +109,16 @@ export default function Statistics() {
     let endedComics = 0;
     const publisherCounts = {};
 
+    // Log first comic to debug field names
+    if (comics.length > 0) {
+      console.log('Statistics - Sample comic fields:', Object.keys(comics[0]));
+      console.log('Statistics - Sample comic data:', comics[0]);
+    }
+
     comics.forEach((comic) => {
-      // Issue counts - HaveIssues/TotalIssues from getIndex
-      const have = parseInt(comic.Have || comic.HaveIssues || 0);
-      const total = parseInt(comic.Total || comic.TotalIssues || 0);
+      // Issue counts - try all known field name variations
+      const have = parseInt(comic.Have || comic.HaveIssues || comic.haveIssues || 0);
+      const total = parseInt(comic.Total || comic.TotalIssues || comic.totalIssues || comic.issues || 0);
       totalIssues += total;
       downloadedIssues += have;
 
@@ -126,8 +132,8 @@ export default function Statistics() {
         endedComics++;
       }
 
-      // Publisher counts
-      const publisher = comic.Publisher || comic.publisher || 'Unknown';
+      // Publisher counts - match pattern from ComicCard/Home
+      const publisher = comic.ComicPublisher || comic.Publisher || comic.publisher || 'Unknown';
       publisherCounts[publisher] = (publisherCounts[publisher] || 0) + 1;
     });
 

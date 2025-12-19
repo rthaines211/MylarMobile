@@ -1,13 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { X, Clock, BookOpen, BarChart3, Settings, Calendar } from 'lucide-react';
+import { X, Clock, BookOpen, BarChart3, Settings } from 'lucide-react';
 
 const menuSections = [
   {
     title: 'Activity',
     items: [
       { to: '/history', icon: Clock, label: 'History' },
-      { to: '/calendar', icon: Calendar, label: 'Calendar' },
     ],
   },
   {
