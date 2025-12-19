@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { X, Clock, BookOpen, BarChart3, Settings, Calendar, FileText } from 'lucide-react';
+import { X, Clock, BookOpen, BarChart3, Settings, Calendar } from 'lucide-react';
 
 const menuSections = [
   {
@@ -20,7 +20,6 @@ const menuSections = [
     title: 'Insights',
     items: [
       { to: '/statistics', icon: BarChart3, label: 'Statistics' },
-      { to: '/logs', icon: FileText, label: 'Logs' },
     ],
   },
   {

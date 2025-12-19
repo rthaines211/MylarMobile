@@ -12,7 +12,6 @@ import Settings from './pages/Settings';
 import StoryArcs from './pages/StoryArcs';
 import Statistics from './pages/Statistics';
 import Calendar from './pages/Calendar';
-import Logs from './pages/Logs';
 
 function ProtectedRoute({ children }) {
   const { isConfigured } = useConfig();
@@ -94,14 +93,6 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Calendar />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/logs"
-        element={
-          <ProtectedRoute>
-            <Logs />
           </ProtectedRoute>
         }
       />

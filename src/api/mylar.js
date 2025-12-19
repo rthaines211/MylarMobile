@@ -146,14 +146,6 @@ class MylarAPI {
     return this.request('forceSearch');
   }
 
-  getLogs() {
-    return this.request('getLogs');
-  }
-
-  clearLogs() {
-    return this.request('clearLogs');
-  }
-
   // Server management
   restart() {
     return this.request('restart');

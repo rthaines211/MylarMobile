@@ -378,31 +378,6 @@ export function useRecheckFiles() {
   });
 }
 
-// Logs query
-export function useLogs() {
-  const { api, isConfigured } = useConfig();
-
-  return useQuery({
-    queryKey: ['logs'],
-    queryFn: () => api.getLogs(),
-    enabled: isConfigured,
-    refetchInterval: 10000, // Refresh every 10 seconds
-  });
-}
-
-// Clear logs mutation
-export function useClearLogs() {
-  const { api } = useConfig();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => api.clearLogs(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['logs'] });
-    },
-  });
-}
-
 // Server restart mutation
 export function useServerRestart() {
   const { api } = useConfig();
