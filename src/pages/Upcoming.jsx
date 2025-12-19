@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Layout from '../components/layout/Layout';
 import ErrorMessage, { EmptyState } from '../components/common/ErrorMessage';
 import { SkeletonList } from '../components/common/Loading';
@@ -16,6 +16,9 @@ import {
   XCircle,
   AlertCircle,
   Plus,
+  Filter,
+  ArrowUpDown,
+  X,
 } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -25,6 +28,16 @@ const STATUS_CONFIG = {
   Skipped: { icon: XCircle, color: 'text-text-muted', bg: 'bg-bg-tertiary' },
   Mismatched: { icon: AlertCircle, color: 'text-accent-danger', bg: 'bg-accent-danger/10' },
 };
+
+const STATUS_OPTIONS = ['All', 'Downloaded', 'Wanted', 'Snatched', 'Skipped', 'Mismatched'];
+
+const SORT_OPTIONS = [
+  { value: 'date', label: 'Ship Date' },
+  { value: 'comic-asc', label: 'Comic (A-Z)' },
+  { value: 'comic-desc', label: 'Comic (Z-A)' },
+  { value: 'publisher', label: 'Publisher' },
+  { value: 'status', label: 'Status' },
+];
 
 function WeeklyItem({ issue }) {
   const [added, setAdded] = useState(false);
@@ -195,6 +208,10 @@ export default function Upcoming() {
   const isDbConfigured = !!mylarDbPath && !!serverUrl;
 
   const [selectedWeek, setSelectedWeek] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [publisherFilter, setPublisherFilter] = useState('');
+  const [sortBy, setSortBy] = useState('date');
+  const [showFilters, setShowFilters] = useState(false);
 
   const {
     data: weeks,
@@ -215,9 +232,60 @@ export default function Upcoming() {
     isRefetching,
   } = useWeeklyPull(selectedWeek?.weeknumber, selectedWeek?.year);
 
+  // Extract unique publishers for filter dropdown
+  const publishers = useMemo(() => {
+    if (!weeklyPull) return [];
+    const unique = [...new Set(weeklyPull.map((i) => i.PUBLISHER).filter(Boolean))];
+    return unique.sort();
+  }, [weeklyPull]);
+
+  // Filter and sort the data
+  const filteredAndSorted = useMemo(() => {
+    if (!weeklyPull) return [];
+
+    let result = [...weeklyPull];
+
+    // Apply status filter
+    if (statusFilter !== 'All') {
+      result = result.filter((issue) => issue.STATUS === statusFilter);
+    }
+
+    // Apply publisher filter
+    if (publisherFilter) {
+      result = result.filter((issue) => issue.PUBLISHER === publisherFilter);
+    }
+
+    // Apply sorting
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case 'comic-asc':
+          return (a.COMIC || '').localeCompare(b.COMIC || '');
+        case 'comic-desc':
+          return (b.COMIC || '').localeCompare(a.COMIC || '');
+        case 'publisher':
+          return (a.PUBLISHER || '').localeCompare(b.PUBLISHER || '');
+        case 'status':
+          return (a.STATUS || '').localeCompare(b.STATUS || '');
+        case 'date':
+        default:
+          return new Date(b.SHIPDATE) - new Date(a.SHIPDATE);
+      }
+    });
+
+    return result;
+  }, [weeklyPull, statusFilter, publisherFilter, sortBy]);
+
   const handleRefresh = useCallback(() => {
     refetch();
   }, [refetch]);
+
+  const clearFilters = () => {
+    setStatusFilter('All');
+    setPublisherFilter('');
+    setSortBy('date');
+  };
+
+  const hasActiveFilters = statusFilter !== 'All' || publisherFilter || sortBy !== 'date';
 
   if (!isConfigured) {
     return (
@@ -263,8 +331,9 @@ export default function Upcoming() {
     );
   }
 
-  const groups = weeklyPull ? groupByDate(weeklyPull) : [];
+  const groups = filteredAndSorted.length > 0 ? groupByDate(filteredAndSorted) : [];
   const pullCount = weeklyPull?.length || 0;
+  const filteredCount = filteredAndSorted.length;
 
   return (
     <Layout title="Weekly Pull List" onRefresh={handleRefresh} isRefreshing={isRefetching}>
@@ -277,17 +346,118 @@ export default function Upcoming() {
       <div className="sticky top-0 z-40 bg-bg-primary border-b border-bg-tertiary">
         <div className="flex items-center justify-between px-4 py-2">
           <p className="text-sm text-text-secondary">
-            {pullCount} {pullCount === 1 ? 'issue' : 'issues'} on your pull list
+            {filteredCount} of {pullCount} {pullCount === 1 ? 'issue' : 'issues'}
           </p>
-          <button
-            onClick={handleRefresh}
-            disabled={isRefetching}
-            className="flex items-center gap-1 text-sm text-accent-primary disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-1.5 rounded-lg ${showFilters || hasActiveFilters ? 'bg-accent-primary/10 text-accent-primary' : 'bg-bg-tertiary text-text-secondary'}`}
+              title="Filter & Sort"
+            >
+              <Filter className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleRefresh}
+              disabled={isRefetching}
+              className="flex items-center gap-1 text-sm text-accent-primary disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
         </div>
+
+        {/* Filter & Sort Panel */}
+        {showFilters && (
+          <div className="px-4 py-3 bg-bg-secondary border-t border-bg-tertiary space-y-3">
+            {/* Status Filter */}
+            <div>
+              <label className="text-xs text-text-muted mb-1.5 block">Status</label>
+              <div className="flex flex-wrap gap-1.5">
+                {STATUS_OPTIONS.map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setStatusFilter(status)}
+                    className={`px-2.5 py-1 text-xs rounded-full transition-colors ${
+                      statusFilter === status
+                        ? 'bg-accent-primary text-white'
+                        : 'bg-bg-tertiary text-text-secondary active:bg-bg-primary'
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Publisher Filter */}
+            <div>
+              <label className="text-xs text-text-muted mb-1.5 block">Publisher</label>
+              <select
+                value={publisherFilter}
+                onChange={(e) => setPublisherFilter(e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-bg-tertiary text-text-primary rounded-lg border-0"
+              >
+                <option value="">All Publishers</option>
+                {publishers.map((pub) => (
+                  <option key={pub} value={pub}>{pub}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort */}
+            <div>
+              <label className="flex items-center gap-1 text-xs text-text-muted mb-1.5">
+                <ArrowUpDown className="w-3 h-3" />
+                Sort by
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {SORT_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSortBy(option.value)}
+                    className={`px-2.5 py-1 text-xs rounded-full transition-colors ${
+                      sortBy === option.value
+                        ? 'bg-accent-primary text-white'
+                        : 'bg-bg-tertiary text-text-secondary active:bg-bg-primary'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Clear Filters */}
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="flex items-center gap-1 text-xs text-accent-danger"
+              >
+                <X className="w-3 h-3" />
+                Clear all filters
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Active filters indicator */}
+        {!showFilters && hasActiveFilters && (
+          <div className="px-4 py-1.5 bg-bg-secondary border-t border-bg-tertiary text-xs text-text-muted flex items-center gap-2">
+            <span>Filtered:</span>
+            {statusFilter !== 'All' && (
+              <span className="px-1.5 py-0.5 bg-bg-tertiary rounded">{statusFilter}</span>
+            )}
+            {publisherFilter && (
+              <span className="px-1.5 py-0.5 bg-bg-tertiary rounded truncate max-w-[120px]">{publisherFilter}</span>
+            )}
+            {sortBy !== 'date' && (
+              <span className="px-1.5 py-0.5 bg-bg-tertiary rounded">
+                {SORT_OPTIONS.find((s) => s.value === sortBy)?.label}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {groups.length === 0 ? (
