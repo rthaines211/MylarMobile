@@ -14,9 +14,7 @@ const GROUP_KEY = 'mylar-home-group';
 const SORT_OPTIONS = [
   { value: 'name-asc', label: 'Name (A-Z)' },
   { value: 'name-desc', label: 'Name (Z-A)' },
-  { value: 'date-desc', label: 'Recently Added' },
-  { value: 'date-asc', label: 'Oldest First' },
-  { value: 'updated-desc', label: 'Recently Updated' },
+  { value: 'publisher', label: 'Publisher' },
 ];
 
 export default function Home() {
@@ -58,37 +56,21 @@ export default function Home() {
     if (!comics) return [];
 
     return [...comics].sort((a, b) => {
-      // Field names from Mylar API (getIndex returns these)
       const getName = (c) => c.ComicName || c.name || '';
-      // DateAdded format from Mylar: "2024-01-15" or similar
-      const getDateAdded = (c) => c.DateAdded || c.dateAdded || '1970-01-01';
-      const getLastUpdated = (c) => c.LastUpdated || c.lastUpdated || '1970-01-01';
+      const getPublisher = (c) => c.ComicPublisher || c.Publisher || c.publisher || '';
 
       switch (sortBy) {
-        case 'name-asc':
-          return getName(a).localeCompare(getName(b));
         case 'name-desc':
           return getName(b).localeCompare(getName(a));
-        case 'date-desc': {
-          // Recently Added - newer dates first
-          const dateA = new Date(getDateAdded(a)).getTime() || 0;
-          const dateB = new Date(getDateAdded(b)).getTime() || 0;
-          return dateB - dateA;
+        case 'publisher': {
+          // Sort by publisher, then by name within publisher
+          const pubCompare = getPublisher(a).localeCompare(getPublisher(b));
+          if (pubCompare !== 0) return pubCompare;
+          return getName(a).localeCompare(getName(b));
         }
-        case 'date-asc': {
-          // Oldest First - older dates first
-          const dateA = new Date(getDateAdded(a)).getTime() || 0;
-          const dateB = new Date(getDateAdded(b)).getTime() || 0;
-          return dateA - dateB;
-        }
-        case 'updated-desc': {
-          // Recently Updated - newer updates first
-          const dateA = new Date(getLastUpdated(a)).getTime() || 0;
-          const dateB = new Date(getLastUpdated(b)).getTime() || 0;
-          return dateB - dateA;
-        }
+        case 'name-asc':
         default:
-          return 0;
+          return getName(a).localeCompare(getName(b));
       }
     });
   }, [comics, sortBy]);
