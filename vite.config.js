@@ -6,7 +6,8 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
+      injectRegister: 'auto',
       includeAssets: ['icons/*.png'],
       manifest: {
         name: 'Mylar Mobile',
@@ -15,6 +16,7 @@ export default defineConfig({
         theme_color: '#1a1a1a',
         background_color: '#1a1a1a',
         display: 'standalone',
+        version: '1.1.0',
         icons: [
           {
             src: 'icons/icon-192.png',

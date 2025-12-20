@@ -6,6 +6,7 @@ import { ConfigProvider } from './context/ConfigContext'
 import { ToastProvider } from './components/common/Toast'
 import ErrorBoundary from './components/common/ErrorBoundary'
 import OfflineIndicator from './components/common/OfflineIndicator'
+import PWAUpdatePrompt from './components/common/PWAUpdatePrompt'
 import App from './App'
 import './index.css'
 
@@ -27,6 +28,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <ConfigProvider>
             <ToastProvider>
               <OfflineIndicator />
+              <PWAUpdatePrompt />
               <App />
             </ToastProvider>
           </ConfigProvider>
