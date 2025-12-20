@@ -5,6 +5,7 @@ const ConfigContext = createContext(null);
 
 const STORAGE_KEY = 'mylar-config';
 const THEME_KEY = 'mylar-theme';
+const PREFERENCES_KEY = 'mylar-preferences';
 const DEFAULT_URL = 'http://100.81.70.9:8090';
 
 export function ConfigProvider({ children }) {
@@ -26,6 +27,18 @@ export function ConfigProvider({ children }) {
     } catch (e) {
       return 'dark';
     }
+  });
+
+  const [preferences, setPreferences] = useState(() => {
+    try {
+      const stored = localStorage.getItem(PREFERENCES_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error('Failed to load preferences:', e);
+    }
+    return { autoQueueIssuesOnAdd: false };
   });
 
   const [isConfigured, setIsConfigured] = useState(false);
@@ -52,8 +65,20 @@ export function ConfigProvider({ children }) {
     setIsConfigured(!!config.serverUrl && !!config.apiKey);
   }, [config]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
+    } catch (e) {
+      console.error('Failed to save preferences:', e);
+    }
+  }, [preferences]);
+
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  const updatePreferences = (updates) => {
+    setPreferences(prev => ({ ...prev, ...updates }));
   };
 
   const api = useMemo(() => {
@@ -81,6 +106,8 @@ export function ConfigProvider({ children }) {
     testConnection,
     theme,
     toggleTheme,
+    preferences,
+    updatePreferences,
   };
 
   return (

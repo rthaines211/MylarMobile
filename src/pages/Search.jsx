@@ -3,13 +3,15 @@ import Layout from '../components/layout/Layout';
 import SearchBar from '../components/search/SearchBar';
 import ErrorMessage, { EmptyState } from '../components/common/ErrorMessage';
 import { SkeletonList } from '../components/common/Loading';
-import { useSearchComics, useAddComic } from '../hooks/useMylar';
+import { useSearchComics, useAddComic, useBatchQueueIssues } from '../hooks/useMylar';
 import { useConfig } from '../context/ConfigContext';
 import { useToast } from '../components/common/Toast';
 import { Search as SearchIcon, Plus, Loader2, Check, Filter, X } from 'lucide-react';
 
 function SearchResultItem({ comic }) {
+  const { preferences, api } = useConfig();
   const addMutation = useAddComic();
+  const batchQueueMutation = useBatchQueueIssues();
   const toast = useToast();
   // API response fields: comicid, name, comicyear, issues, comicimage, comicthumb, publisher, haveit
   // haveit is an object {comicid, status} when in library, or "No" string when not
@@ -18,11 +20,53 @@ function SearchResultItem({ comic }) {
   const imageUrl = comic.comicthumb || comic.comicimage;
   const alreadyOwned = typeof comic.haveit === 'object' && comic.haveit !== null;
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     console.log('Adding comic:', comicId, comicName);
     addMutation.mutate(comicId, {
-      onSuccess: () => {
+      onSuccess: async () => {
         toast.success(`Added "${comicName}" to watchlist`);
+
+        // Check if auto-queue is enabled
+        if (preferences.autoQueueIssuesOnAdd) {
+          try {
+            // Fetch the newly added comic to get issue list
+            const comicData = await api.getComic(comicId);
+            const issues = comicData?.issues || [];
+
+            // Filter to only wanted/skipped issues
+            const wantedIssues = issues.filter(
+              (issue) => {
+                const status = issue.Status || issue.status;
+                return status === 'Wanted' || status === 'Skipped';
+              }
+            );
+
+            if (wantedIssues.length > 0) {
+              // Show confirmation dialog
+              const confirmed = window.confirm(
+                `Queue all ${wantedIssues.length} wanted issue${wantedIssues.length !== 1 ? 's' : ''} for "${comicName}"?`
+              );
+
+              if (confirmed) {
+                const issueIds = wantedIssues.map((i) => i.IssueID || i.id);
+                batchQueueMutation.mutate(issueIds, {
+                  onSuccess: (result) => {
+                    if (result.failed > 0) {
+                      toast.warning(`Queued ${result.succeeded} of ${result.total} issues`);
+                    } else {
+                      toast.success(`Queued ${result.succeeded} issue${result.succeeded !== 1 ? 's' : ''}`);
+                    }
+                  },
+                  onError: () => {
+                    toast.error('Failed to queue issues');
+                  },
+                });
+              }
+            }
+          } catch (err) {
+            console.error('Failed to fetch comic details for auto-queue:', err);
+          }
+        }
       },
       onError: (err) => {
         toast.error(`Failed to add: ${err.message}`);

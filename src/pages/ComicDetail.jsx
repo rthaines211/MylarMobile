@@ -11,9 +11,11 @@ import {
   FileSearch,
   ChevronDown,
   ChevronUp,
+  Download,
 } from 'lucide-react';
-import { useComic, useComicInfo, useRefreshComic, usePauseComic, useResumeComic, useDeleteComic, useRecheckFiles } from '../hooks/useMylar';
+import { useComic, useComicInfo, useRefreshComic, usePauseComic, useResumeComic, useDeleteComic, useRecheckFiles, useBatchQueueIssues } from '../hooks/useMylar';
 import { useConfig } from '../context/ConfigContext';
+import { useToast } from '../components/common/Toast';
 import IssueList from '../components/comics/IssueList';
 import BottomNav from '../components/layout/BottomNav';
 import { LoadingScreen } from '../components/common/Loading';
@@ -23,6 +25,7 @@ export default function ComicDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { api } = useConfig();
+  const toast = useToast();
   const [showMenu, setShowMenu] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -34,6 +37,7 @@ export default function ComicDetail() {
   const resumeMutation = useResumeComic();
   const deleteMutation = useDeleteComic();
   const recheckMutation = useRecheckFiles();
+  const batchQueueMutation = useBatchQueueIssues();
 
   // comic is returned as an array with one element
   const comic = data?.comic?.[0] || data?.comic || data;
@@ -74,6 +78,40 @@ export default function ComicDetail() {
   const handleRecheckFiles = () => {
     recheckMutation.mutate(id);
     setShowMenu(false);
+  };
+
+  const handleDownloadAll = () => {
+    // Filter to only wanted/skipped issues
+    const wantedIssues = issues.filter((issue) => {
+      const status = issue.Status || issue.status;
+      return status === 'Wanted' || status === 'Skipped';
+    });
+
+    if (wantedIssues.length === 0) {
+      toast.info('No issues available to queue');
+      return;
+    }
+
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `Queue ${wantedIssues.length} wanted issue${wantedIssues.length !== 1 ? 's' : ''} for download?`
+    );
+
+    if (confirmed) {
+      const issueIds = wantedIssues.map((i) => i.IssueID || i.id);
+      batchQueueMutation.mutate(issueIds, {
+        onSuccess: (result) => {
+          if (result.failed > 0) {
+            toast.warning(`Queued ${result.succeeded} of ${result.total} issues`);
+          } else {
+            toast.success(`Queued ${result.succeeded} issue${result.succeeded !== 1 ? 's' : ''}`);
+          }
+        },
+        onError: () => {
+          toast.error('Failed to queue issues');
+        },
+      });
+    }
   };
 
   if (isLoading) {
@@ -128,6 +166,18 @@ export default function ComicDetail() {
                 <Loader2 className="w-5 h-5 text-text-secondary animate-spin" />
               ) : (
                 <RefreshCw className="w-5 h-5 text-text-secondary" />
+              )}
+            </button>
+            <button
+              onClick={handleDownloadAll}
+              disabled={batchQueueMutation.isPending}
+              className="p-2 rounded-full active:bg-bg-tertiary disabled:opacity-50"
+              title="Download All Issues"
+            >
+              {batchQueueMutation.isPending ? (
+                <Loader2 className="w-5 h-5 text-text-secondary animate-spin" />
+              ) : (
+                <Download className="w-5 h-5 text-text-secondary" />
               )}
             </button>
             <div className="relative">

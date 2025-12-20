@@ -5,7 +5,7 @@ import { useConfig } from '../context/ConfigContext';
 import { useServerRestart, useServerShutdown, useServerUpdate } from '../hooks/useMylar';
 
 export default function Settings() {
-  const { config, updateConfig, testConnection, isConfigured, theme, toggleTheme } = useConfig();
+  const { config, updateConfig, testConnection, isConfigured, theme, toggleTheme, preferences, updatePreferences } = useConfig();
   const navigate = useNavigate();
 
   const [serverUrl, setServerUrl] = useState(config.serverUrl);
@@ -81,6 +81,7 @@ export default function Settings() {
         apiKey: config.apiKey,
         mylarDbPath: config.mylarDbPath,
       },
+      preferences,
       theme,
     };
 
@@ -107,6 +108,9 @@ export default function Settings() {
           setServerUrl(data.config.serverUrl || '');
           setApiKey(data.config.apiKey || '');
           setMylarDbPath(data.config.mylarDbPath || '');
+          if (data.preferences) {
+            updatePreferences(data.preferences);
+          }
           alert('Settings imported successfully. Click "Save Settings" to apply.');
         } else {
           alert('Invalid settings file format.');
@@ -216,6 +220,34 @@ export default function Settings() {
               <span
                 className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform ${
                   theme === 'dark' ? 'left-7' : 'left-1'
+                }`}
+              />
+            </button>
+          </div>
+        </section>
+
+        {/* Download Preferences */}
+        <section className="space-y-4">
+          <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wide">
+            Download Preferences
+          </h2>
+
+          <div className="flex items-center justify-between p-4 bg-bg-secondary rounded-xl">
+            <div>
+              <p className="text-text-primary font-medium">Auto-Queue Issues</p>
+              <p className="text-sm text-text-secondary">
+                Automatically queue all wanted issues when adding a new series
+              </p>
+            </div>
+            <button
+              onClick={() => updatePreferences({ autoQueueIssuesOnAdd: !preferences.autoQueueIssuesOnAdd })}
+              className={`relative w-14 h-8 rounded-full transition-colors ${
+                preferences.autoQueueIssuesOnAdd ? 'bg-accent-primary' : 'bg-bg-tertiary'
+              }`}
+            >
+              <span
+                className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                  preferences.autoQueueIssuesOnAdd ? 'left-7' : 'left-1'
                 }`}
               />
             </button>
