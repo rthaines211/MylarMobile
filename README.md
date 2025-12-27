@@ -23,29 +23,25 @@ A Progressive Web App (PWA) mobile interface for [Mylar3](https://github.com/myl
 ## Screenshots
 
 <p align="center">
-  <img src="screenshots/home.png" width="200" alt="Home Page">
-  <img src="screenshots/comic-detail.png" width="200" alt="Comic Detail">
-  <img src="screenshots/search.png" width="200" alt="Search">
-  <img src="screenshots/settings.png" width="200" alt="Settings">
+  <img src="https://raw.githubusercontent.com/rthaines211/MylarMobile/main/screenshots/home.png" width="200" alt="Home Page">
+  <img src="https://raw.githubusercontent.com/rthaines211/MylarMobile/main/screenshots/comic-detail.png" width="200" alt="Comic Detail">
+  <img src="https://raw.githubusercontent.com/rthaines211/MylarMobile/main/screenshots/search.png" width="200" alt="Search">
+  <img src="https://raw.githubusercontent.com/rthaines211/MylarMobile/main/screenshots/settings.png" width="200" alt="Settings">
 </p>
 
 ## Quick Start
 
 ### Docker (Recommended)
 
-1. Clone the repository:
-```bash
-git clone https://github.com/rthaines211/MylarMobile.git
-cd MylarMobile
-```
+#### Option 1: Pre-built Image (Easiest)
 
-2. Configure `docker-compose.yml`:
+1. Create a `docker-compose.yml`:
 ```yaml
 version: '3.8'
 
 services:
   mylarmobile:
-    build: .
+    image: ghcr.io/rthaines211/mylarmobile:latest
     container_name: mylarmobile
     ports:
       - "8080:8080"
@@ -58,12 +54,27 @@ services:
     restart: unless-stopped
 ```
 
-3. Start the container:
+2. Start the container:
+```bash
+docker-compose up -d
+```
+
+3. Open `http://your-server:8080` and configure your API key in Settings
+
+#### Option 2: Build from Source
+
+1. Clone the repository:
+```bash
+git clone https://github.com/rthaines211/MylarMobile.git
+cd MylarMobile
+```
+
+2. Start the container:
 ```bash
 docker-compose up -d --build
 ```
 
-4. Open `http://your-server:8080` and configure your API key in Settings
+3. Open `http://your-server:8080` and configure your API key in Settings
 
 ### Running with Mylar in Same Docker Compose
 
@@ -88,7 +99,7 @@ services:
     restart: unless-stopped
 
   mylarmobile:
-    build: .
+    image: ghcr.io/rthaines211/mylarmobile:latest
     container_name: mylarmobile
     ports:
       - "8080:8080"

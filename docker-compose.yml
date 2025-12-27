@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   mylarmobile:
-    build: .
+    image: ghcr.io/rthaines211/mylarmobile:latest
+    # To build from source instead, comment the line above and uncomment below:
+    # build: .
     container_name: mylarmobile
     ports:
       - "${APP_PORT:-8080}:${APP_PORT:-8080}"
